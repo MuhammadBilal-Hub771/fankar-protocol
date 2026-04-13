@@ -1,0 +1,15 @@
+# ── Secrets (NEVER commit these) ──
+.env
+
+# ── Hardhat build output ──
+artifacts/
+cache/
+dist/
+typechain-types/
+
+# ── Dependencies ──
+node_modules/
+
+# ── Misc ──
+*.log
+.DS_Store

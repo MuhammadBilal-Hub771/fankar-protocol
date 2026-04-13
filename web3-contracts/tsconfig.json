@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    /* ── Language & Target ── */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    /* ── Module System (ESM / NodeNext required by Hardhat 3) ── */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    /* ── Node.js Globals (console, process, __dirname, Buffer …) ── */
+    "types": ["node"],
+
+    /* ── Type Safety ── */
+    "strict": true,
+    "skipLibCheck": true,
+
+    /* ── Output ── */
+    "outDir": "./dist",
+    "sourceMap": true
+  },
+  "include": [
+    "hardhat.config.ts",
+    "scripts/**/*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "artifacts",
+    "cache"
+  ]
+}
