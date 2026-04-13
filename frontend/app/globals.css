@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --bg-deep: #050b14;
+  --bg-surface: #0a1628;
+  --bg-card: #0d1f35;
+  --neon-green: #00ff88;
+  --neon-green-dim: #00cc6a;
+  --neon-blue: #00b4ff;
+  --neon-purple: #a855f7;
+  --border-glow: rgba(0, 255, 136, 0.25);
+  --text-primary: #e2f0ff;
+  --text-muted: #6b8cae;
+  --sidebar-width: 260px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.4);
+}
+
+/* Neon glow text utility */
+.neon-text {
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.7), 0 0 24px rgba(0, 255, 136, 0.3);
+}
+
+.neon-text-blue {
+  color: var(--neon-blue);
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.7), 0 0 24px rgba(0, 180, 255, 0.3);
+}
+
+/* Grid scanline overlay */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 136, 0.012) 2px,
+    rgba(0, 255, 136, 0.012) 4px
+  );
+}
+
+/* Animated gradient border */
+@keyframes borderGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(0, 255, 136, 0.3), inset 0 0 6px rgba(0, 255, 136, 0.05); }
+  50% { box-shadow: 0 0 18px rgba(0, 255, 136, 0.5), inset 0 0 12px rgba(0, 255, 136, 0.08); }
+}
+
+@keyframes pulseGreen {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
