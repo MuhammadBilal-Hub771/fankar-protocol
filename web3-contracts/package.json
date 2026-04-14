@@ -9,6 +9,7 @@
     "clean": "hardhat clean",
     "deploy:wirefluid": "hardhat --network wirefluid run scripts/deploy.ts",
     "deploy:local": "hardhat --network localhost run scripts/deploy.ts",
+    "update-signer": "hardhat --network wirefluid run scripts/update-signer.ts",
     "test": "hardhat test",
     "typecheck": "tsc --noEmit"
   },

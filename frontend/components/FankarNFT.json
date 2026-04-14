@@ -1,0 +1,55 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "creator",          "type": "address" },
+      { "internalType": "address", "name": "brand",            "type": "address" },
+      { "internalType": "string",  "name": "uri",              "type": "string"  },
+      { "internalType": "uint256", "name": "mintFee",          "type": "uint256" },
+      { "internalType": "uint256", "name": "_bowlingSpeed",    "type": "uint256" },
+      { "internalType": "uint256", "name": "_uniquenessScore", "type": "uint256" },
+      { "internalType": "uint256", "name": "nonce",            "type": "uint256" },
+      { "internalType": "bytes",   "name": "signature",        "type": "bytes"   }
+    ],
+    "name": "mintFankarAsset",
+    "outputs": [
+      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+    "name": "tokenURI",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalMinted",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "aiSigner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "uint256", "name": "tokenId",    "type": "uint256" },
+      { "indexed": true,  "internalType": "address", "name": "minter",     "type": "address" },
+      { "indexed": true,  "internalType": "address", "name": "creator",    "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "brand",      "type": "address" },
+      { "indexed": false, "internalType": "string",  "name": "uri",        "type": "string"  },
+      { "indexed": false, "internalType": "uint256", "name": "bowlingSpd", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "uniqueScore","type": "uint256" }
+    ],
+    "name": "AssetMinted",
+    "type": "event"
+  }
+]

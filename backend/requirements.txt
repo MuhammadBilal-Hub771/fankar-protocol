@@ -1,0 +1,17 @@
+# ── Web Framework ──────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+
+# ── Blockchain / Signing ───────────────────────────────────
+web3==7.6.0
+eth-account==0.13.4
+
+# ── IPFS (Pinata) ──────────────────────────────────────────
+httpx==0.28.1
+requests==2.32.3
+
+# ── Config ─────────────────────────────────────────────────
+python-dotenv==1.0.1
+pydantic==2.10.4
+pydantic-settings==2.7.0
