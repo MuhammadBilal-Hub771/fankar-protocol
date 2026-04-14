@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import { WalletProvider } from "@/context/WalletContext";
 
 export const metadata: Metadata = {
   title: "Fankar Protocol",
@@ -67,30 +68,32 @@ export default function RootLayout({
           }}
         />
 
-        {/* Main app shell */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            display: "flex",
-            minHeight: "100vh",
-          }}
-        >
-          <Sidebar />
-
-          <main
+        {/* Main app shell — WalletProvider gives Sidebar + TopBar shared state */}
+        <WalletProvider>
+          <div
             style={{
-              flex: 1,
-              marginLeft: "var(--sidebar-width)",
-              minHeight: "100vh",
+              position: "relative",
+              zIndex: 1,
               display: "flex",
-              flexDirection: "column",
+              minHeight: "100vh",
             }}
           >
-            <TopBar />
-            <div style={{ flex: 1, padding: "32px" }}>{children}</div>
-          </main>
-        </div>
+            <Sidebar />
+
+            <main
+              style={{
+                flex: 1,
+                marginLeft: "var(--sidebar-width)",
+                minHeight: "100vh",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <TopBar />
+              <div style={{ flex: 1, padding: "32px" }}>{children}</div>
+            </main>
+          </div>
+        </WalletProvider>
       </body>
     </html>
   );

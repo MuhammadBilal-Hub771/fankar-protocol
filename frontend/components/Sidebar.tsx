@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useWallet } from "@/context/WalletContext";
 
 // ── Nav item definitions ─────────────────────────────────────
 
@@ -209,11 +210,12 @@ function NavButton({ item, isActive, onClick }: NavButtonProps) {
   );
 }
 
-// ── Inner sidebar (needs useSearchParams) ────────────────────
+// ── Inner sidebar (needs useSearchParams + wallet) ───────────
 function SidebarInner() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const activeView   = searchParams.get("view") ?? "kit_design";
+  const { address, shortAddress, balance, isConnected, connect, isConnecting } = useWallet();
 
   const navigate = (id: string) => router.push(`/?view=${id}`);
 
@@ -305,32 +307,60 @@ function SidebarInner() {
         ))}
       </nav>
 
-      {/* ── Wallet snippet ── */}
+      {/* ── Wallet panel ── */}
       <div style={{ padding: "16px 16px 24px", borderTop: "1px solid rgba(0,255,136,0.08)" }}>
-        <div style={{
-          background: "linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(0,180,255,0.04) 100%)",
-          border: "1px solid rgba(0,255,136,0.14)",
-          borderRadius: "10px", padding: "14px",
-        }}>
-          <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>
-            Wallet
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{
-              width: "28px", height: "28px", borderRadius: "50%",
-              background: "linear-gradient(135deg, #00ff88 0%, #00b4ff 100%)",
-              opacity: 0.7, flexShrink: 0,
-            }} />
-            <div>
-              <div style={{ fontSize: "12px", color: "#a8c8e8", fontFamily: "monospace", letterSpacing: "0.04em" }}>
-                0x3f...a9b2
-              </div>
-              <div style={{ fontSize: "11px", color: "var(--neon-green)", fontWeight: 600 }}>
-                12.44 WIRE
+        {isConnected && address && shortAddress ? (
+          /* Connected state */
+          <div style={{
+            background: "linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(0,180,255,0.04) 100%)",
+            border: "1px solid rgba(0,255,136,0.14)",
+            borderRadius: "10px", padding: "14px",
+          }}>
+            <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>
+              Wallet
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{
+                width: "28px", height: "28px", borderRadius: "50%",
+                background: "linear-gradient(135deg, #00ff88 0%, #00b4ff 100%)",
+                opacity: 0.85, flexShrink: 0,
+              }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: "12px", color: "#a8c8e8", fontFamily: "monospace", letterSpacing: "0.04em" }}>
+                  {shortAddress}
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--neon-green)", fontWeight: 600 }}>
+                  {balance !== null ? `${balance} WIRE` : "Loading…"}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Disconnected state */
+          <button
+            onClick={connect}
+            disabled={isConnecting}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,180,255,0.05) 100%)",
+              border: "1px solid rgba(0,255,136,0.22)",
+              color: "var(--neon-green)",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              cursor: isConnecting ? "wait" : "pointer",
+              opacity: isConnecting ? 0.7 : 1,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 16px rgba(0,255,136,0.2)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "none"; }}
+          >
+            {isConnecting ? "Connecting…" : "Connect Wallet"}
+          </button>
+        )}
 
         <div style={{ marginTop: "14px", textAlign: "center", fontSize: "10px", color: "rgba(107,140,174,0.4)", letterSpacing: "0.06em" }}>
           © 2026 Fankar Protocol
