@@ -162,7 +162,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // ── MetaMask event listeners ──────────────────────────────
   useEffect(() => {
     if (typeof window === "undefined" || !window.ethereum) return;
-    const eth = window.ethereum as {
+    const eth = window.ethereum as unknown as {
       on: (event: string, handler: (data: unknown) => void) => void;
       removeListener: (event: string, handler: (data: unknown) => void) => void;
     };
