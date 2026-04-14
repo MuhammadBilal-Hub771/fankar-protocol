@@ -55,6 +55,15 @@ export default function AssetDetailsModal({ nft, onClose, onSuccess }: Props) {
   const [txHash,   setTxHash]   = useState("");
   const [errMsg,   setErrMsg]   = useState("");
   const [imgError, setImgError] = useState(false);
+  const [copied,   setCopied]   = useState(false);
+
+  const copyTxHash = () => {
+    if (!txHash) return;
+    navigator.clipboard.writeText(txHash).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -435,11 +444,100 @@ export default function AssetDetailsModal({ nft, onClose, onSuccess }: Props) {
                   You now own <strong style={{ color: "#e2f0ff" }}>{nft.title}</strong>
                 </div>
                 {txHash && (
-                  <div style={{
-                    marginTop: "8px", fontSize: "10px", fontFamily: "monospace",
-                    color: "rgba(0,255,136,0.55)", letterSpacing: "0.04em",
-                  }}>
-                    Tx: {shortenHash(txHash)}
+                  <div style={{ marginTop: "12px" }}>
+                    {/* Label */}
+                    <div style={{
+                      fontSize: "10px", color: "var(--text-muted)",
+                      textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px",
+                    }}>
+                      Transaction Hash
+                    </div>
+
+                    {/* Hash row */}
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: "10px",
+                      padding: "10px 14px", borderRadius: "9px",
+                      background: "rgba(0,0,0,0.35)",
+                      border: "1px solid rgba(0,255,136,0.18)",
+                    }}>
+                      {/* Hash text — larger, full monospace */}
+                      <code style={{
+                        flex: 1,
+                        fontSize: "13px",
+                        fontFamily: "monospace",
+                        color: "rgba(0,255,136,0.80)",
+                        letterSpacing: "0.04em",
+                        wordBreak: "break-all",
+                        lineHeight: 1.5,
+                      }}>
+                        {txHash}
+                      </code>
+
+                      {/* Copy button */}
+                      <button
+                        onClick={copyTxHash}
+                        title={copied ? "Copied!" : "Copy transaction hash"}
+                        style={{
+                          flexShrink: 0,
+                          width: "32px", height: "32px",
+                          borderRadius: "8px",
+                          border: copied
+                            ? "1px solid rgba(0,255,136,0.55)"
+                            : "1px solid rgba(255,255,255,0.12)",
+                          background: copied
+                            ? "rgba(0,255,136,0.12)"
+                            : "rgba(255,255,255,0.05)",
+                          color: copied ? "var(--neon-green)" : "#a8c8e8",
+                          cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 0.2s ease",
+                          boxShadow: copied ? "0 0 10px rgba(0,255,136,0.25)" : "none",
+                        }}
+                        onMouseEnter={e => {
+                          if (!copied) {
+                            (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.22)";
+                          }
+                        }}
+                        onMouseLeave={e => {
+                          if (!copied) {
+                            (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)";
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+                          }
+                        }}
+                      >
+                        {copied ? (
+                          /* Checkmark icon */
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2.5"
+                            strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        ) : (
+                          /* Copy icon */
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2"
+                            strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Copied feedback text */}
+                    <div style={{
+                      marginTop: "6px",
+                      fontSize: "11px",
+                      color: "var(--neon-green)",
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      opacity: copied ? 1 : 0,
+                      transition: "opacity 0.25s ease",
+                      height: "16px",
+                    }}>
+                      ✓ Copied to clipboard!
+                    </div>
                   </div>
                 )}
               </div>
