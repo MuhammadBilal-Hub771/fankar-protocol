@@ -12,7 +12,11 @@ import { ethers } from "ethers";
 import FankarNFTAbi from "./FankarNFT.json";
 
 // ── Constants ────────────────────────────────────────────────
-const AI_API_URL       = "http://127.0.0.1:8000/api/v1/mint-asset";
+// NEXT_PUBLIC_API_URL must be set in Vercel dashboard (production) and
+// .env.local (development). It must NOT have a trailing slash.
+// Example: https://fankar-protocol.onrender.com
+const API_BASE_URL     = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+const AI_API_URL       = `${API_BASE_URL}/api/v1/mint-asset`;
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "";
 const WIREFLUID_CHAIN_ID = 92533;
 
@@ -305,7 +309,12 @@ export default function FankarMintStudio({ initialTab }: { initialTab?: TabId })
       formData.append("listing_price_wire",   listingPrice || "0");
       formData.append("bowling_speed_input",  getBowlingSpeed());
 
-      const apiResponse = await fetch(AI_API_URL, { method: "POST", body: formData });
+      console.log("[FankarMintStudio] POST →", AI_API_URL);
+      const apiResponse = await fetch(AI_API_URL, {
+        method: "POST",
+        body: formData,
+        // No Content-Type header — browser sets multipart/form-data + boundary automatically
+      });
       if (!apiResponse.ok) {
         const errData = await apiResponse.json().catch(() => ({ detail: "Unknown AI error" }));
         throw new Error(`AI Gatekeeper: ${errData.detail ?? apiResponse.statusText}`);

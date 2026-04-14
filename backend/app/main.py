@@ -80,13 +80,37 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Allow the Next.js frontend (and any other origin in dev) to call the API.
-# Restrict `allow_origins` to specific domains in production.
+# ── CORS ──────────────────────────────────────────────────
+# ALLOWED_ORIGINS env var lets you whitelist production domains without
+# changing code. Set it in Render's environment dashboard as a
+# comma-separated list, e.g.:
+#   ALLOWED_ORIGINS=https://fankar-protocol.vercel.app,https://www.fankar.io
+#
+# If not set, the default list below is used (covers local dev + any
+# Vercel preview/production URLs via the wildcard "*.vercel.app").
+import os as _os
+_raw_origins = _os.getenv("ALLOWED_ORIGINS", "")
+_extra_origins: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+CORS_ORIGINS: list[str] = [
+    # ── Local development ──
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # ── Vercel production (exact match) ──
+    "https://fankar-protocol.vercel.app",
+    # ── Any domains injected via ALLOWED_ORIGINS env var ──
+    *_extra_origins,
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "*"],
+    allow_origins=CORS_ORIGINS,
+    # Regex covers ALL Vercel preview/branch deploy URLs (*.vercel.app)
+    # Note: allow_origin_regex is used for wildcard patterns; allow_origins
+    # only accepts exact strings — globs like "*.vercel.app" are invalid there.
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 

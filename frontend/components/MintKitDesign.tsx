@@ -17,7 +17,8 @@ import { ethers } from "ethers";
 import FankarNFTAbi from "./FankarNFT.json";
 
 // ── Constants ───────────────────────────────────────────────
-const AI_API_URL      = "http://127.0.0.1:8000/api/v1/mint-asset";
+const API_BASE_URL     = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+const AI_API_URL       = `${API_BASE_URL}/api/v1/mint-asset`;
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "";
 const WIREFLUID_CHAIN_ID = 92533;
 const ZERO_ADDRESS    = "0x0000000000000000000000000000000000000000";
@@ -224,6 +225,7 @@ export default function MintKitDesign() {
       formData.append("brand_address",    minterAddress);
       formData.append("mint_fee",         "0");
 
+      console.log("[MintKitDesign] POST →", AI_API_URL);
       const apiResponse = await fetch(AI_API_URL, {
         method: "POST",
         body:   formData,
