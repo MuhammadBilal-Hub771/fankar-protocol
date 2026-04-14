@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fankar Protocol — Pitch Deck</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --neon-green : #00ff88;
+    --neon-blue  : #00b4ff;
+    --neon-gold  : #facc15;
+    --neon-pink  : #ff4dff;
+    --bg-deep    : #020b14;
+    --bg-card    : rgba(10,22,40,0.95);
+    --text-main  : #e2f0ff;
+    --text-muted : #6b8cae;
+    --slide-w    : 1280px;
+    --slide-h    : 720px;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-deep);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+  }
+
+  /* ── Slide engine ─────────────────────────────────────── */
+  #deck {
+    width: var(--slide-w); height: var(--slide-h);
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1; transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit {
+    opacity: 0; transform: translateX(-60px);
+  }
+
+  /* ── Background grid (every slide) ───────────────────── */
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* ── Navigation ───────────────────────────────────────── */
+  #nav {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 20px;
+    z-index: 999;
+  }
+  #nav button {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.35);
+    color: var(--neon-green);
+    padding: 8px 24px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    letter-spacing: 0.06em; cursor: pointer;
+    transition: all 0.2s;
+  }
+  #nav button:hover {
+    background: rgba(0,255,136,0.2);
+    box-shadow: 0 0 16px rgba(0,255,136,0.3);
+  }
+  #nav button:disabled { opacity: 0.3; cursor: default; }
+  #counter {
+    font-size: 13px; color: var(--text-muted);
+    letter-spacing: 0.08em; min-width: 60px; text-align: center;
+  }
+
+  /* ── Dots ─────────────────────────────────────────────── */
+  #dots {
+    position: fixed; bottom: 76px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 999;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(0,255,136,0.2);
+    border: 1px solid rgba(0,255,136,0.3);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dot.active {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+  }
+
+  /* ── Slide number badge ───────────────────────────────── */
+  .slide-num {
+    position: absolute; top: 24px; right: 32px;
+    font-size: 11px; color: rgba(0,255,136,0.3);
+    letter-spacing: 0.15em; font-family: monospace;
+  }
+
+  /* ── Logo mark (reusable) ─────────────────────────────── */
+  .logo-mark {
+    position: absolute; top: 22px; left: 32px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-hex {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: linear-gradient(135deg, rgba(0,255,136,0.18), rgba(0,180,255,0.13));
+    border: 1px solid rgba(0,255,136,0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-text { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: rgba(226,240,255,0.7); }
+  .logo-sub  { font-size: 9px; color: rgba(0,255,136,0.7); letter-spacing: 0.14em; display: block; }
+
+  /* ── Typography helpers ───────────────────────────────── */
+  .tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 4px;
+    margin-bottom: 18px;
+  }
+  .tag-green { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.35); color: var(--neon-green); }
+  .tag-blue  { background: rgba(0,180,255,0.1); border: 1px solid rgba(0,180,255,0.35); color: var(--neon-blue); }
+  .tag-gold  { background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.35); color: var(--neon-gold); }
+  .tag-pink  { background: rgba(255,77,255,0.1); border: 1px solid rgba(255,77,255,0.35); color: var(--neon-pink); }
+
+  h1 { font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
+  h2 { font-size: 38px; font-weight: 700; line-height: 1.2; }
+  h3 { font-size: 22px; font-weight: 600; }
+
+  .gradient-text {
+    background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-gold {
+    background: linear-gradient(90deg, var(--neon-gold) 0%, #fb923c 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  p.lead { font-size: 18px; color: var(--text-muted); line-height: 1.6; max-width: 720px; text-align: center; }
+
+  /* ── Cards ────────────────────────────────────────────── */
+  .card {
+    background: linear-gradient(135deg, rgba(10,22,40,0.9), rgba(5,11,20,0.9));
+    border: 1px solid rgba(0,255,136,0.14);
+    border-radius: 14px; padding: 24px;
+  }
+  .card-blue  { border-color: rgba(0,180,255,0.2); }
+  .card-gold  { border-color: rgba(250,204,21,0.2); }
+  .card-pink  { border-color: rgba(255,77,255,0.2); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; width: 100%; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; width: 100%; }
+
+  .stat-big { font-size: 42px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
+
+  /* ── Divider line ─────────────────────────────────────── */
+  .neon-line {
+    width: 80px; height: 3px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+    margin: 16px auto;
+  }
+
+  /* ── Glow blobs ───────────────────────────────────────── */
+  .blob {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    filter: blur(80px); z-index: 0;
+  }
+
+  /* ── Flow step ────────────────────────────────────────── */
+  .flow {
+    display: flex; align-items: center; gap: 0; width: 100%;
+  }
+  .flow-step {
+    flex: 1; text-align: center;
+    background: rgba(10,22,40,0.8);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 10px; padding: 16px 10px;
+  }
+  .flow-arrow {
+    color: rgba(0,255,136,0.4); font-size: 22px;
+    padding: 0 8px; flex-shrink: 0;
+  }
+
+  /* ── Progress bar ─────────────────────────────────────── */
+  .bar-track {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.06);
+    border-radius: 3px; margin-top: 8px; overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 3px; }
+
+  /* ── Pulse animation ──────────────────────────────────── */
+  @keyframes pulse {
+    0%,100% { opacity:1; box-shadow: 0 0 8px var(--neon-green); }
+    50%      { opacity:0.6; box-shadow: 0 0 18px var(--neon-green); }
+  }
+  .pulse-dot {
+    width:10px; height:10px; border-radius:50%;
+    background: var(--neon-green);
+    animation: pulse 2s ease-in-out infinite; display:inline-block;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .slide.active .animate { animation: fadeUp 0.5s ease forwards; }
+  .slide.active .animate:nth-child(2) { animation-delay: 0.1s; opacity:0; }
+  .slide.active .animate:nth-child(3) { animation-delay: 0.2s; opacity:0; }
+  .slide.active .animate:nth-child(4) { animation-delay: 0.3s; opacity:0; }
+  .slide.active .animate:nth-child(5) { animation-delay: 0.4s; opacity:0; }
+  .slide.active .animate:nth-child(6) { animation-delay: 0.5s; opacity:0; }
+
+  /* ── Slide 1 — hero hexagon ───────────────────────────── */
+  .hero-hex {
+    width: 120px; height: 120px; border-radius: 24px;
+    background: linear-gradient(135deg, rgba(0,255,136,0.18), rgba(0,180,255,0.12));
+    border: 2px solid rgba(0,255,136,0.5);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(0,255,136,0.25), inset 0 0 20px rgba(0,255,136,0.06);
+    margin-bottom: 28px;
+  }
+
+  /* ── Timeline (roadmap) ───────────────────────────────── */
+  .timeline { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .tl-row { display: flex; align-items: flex-start; gap: 20px; }
+  .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid; margin-top: 4px;
+  }
+  .tl-line { width: 2px; flex: 1; min-height: 24px; margin-top: 4px; }
+
+  /* ── Tech stack badge ─────────────────────────────────── */
+  .tech-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide active" id="s1">
+    <div class="blob" style="width:500px;height:500px;background:radial-gradient(circle,rgba(0,255,136,0.07),transparent 70%);top:-100px;left:-100px;"></div>
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(0,180,255,0.07),transparent 70%);bottom:-80px;right:-80px;"></div>
+    <div class="slide-num">01 / 10</div>
+
+    <div class="hero-hex animate">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="1.5" fill="rgba(0,255,136,0.12)" />
+        <circle cx="12" cy="12" r="3.5" fill="#00ff88" opacity="0.9" />
+      </svg>
+    </div>
+
+    <div class="tag tag-green animate">WireFluid Blockchain</div>
+
+    <h1 class="animate" style="text-align:center;">
+      <span class="gradient-text">Fankar Protocol</span>
+    </h1>
+
+    <p class="lead animate" style="margin-top:16px;font-size:20px;">
+      The World's First <strong style="color:var(--text-main);">AI-Gated NFT Minting</strong> Platform
+      for Creators, Athletes, Influencers &amp; Culture.
+    </p>
+
+    <div class="neon-line animate"></div>
+
+    <div style="display:flex;gap:28px;margin-top:20px;" class="animate">
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">Network</div>
+        <div style="font-size:14px;font-weight:700;color:var(--neon-green);">WireFluid EVM</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">Currency</div>
+        <div style="font-size:14px;font-weight:700;color:var(--neon-blue);">WIRE Token</div>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">Standard</div>
+        <div style="font-size:14px;font-weight:700;color:var(--neon-gold);">ERC-721 + AI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 2 — PROBLEM
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(255,60,60,0.06),transparent 70%);top:-80px;right:0;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">02 / 10</div>
+
+    <div class="tag tag-pink animate">The Problem</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">The NFT Space is Broken for <span class="gradient-text">Culture Creators</span></h2>
+    <div class="neon-line animate"></div>
+
+    <div class="grid-3 animate" style="margin-top:28px;">
+      <div class="card" style="border-color:rgba(255,60,60,0.25);">
+        <div style="font-size:32px;margin-bottom:12px;">🚫</div>
+        <h3 style="color:#ff6060;font-size:16px;margin-bottom:8px;">No Quality Gate</h3>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Anyone can mint anything — spam, plagiarism, and low-effort assets flood the market, destroying creator value.</p>
+      </div>
+      <div class="card" style="border-color:rgba(255,165,0,0.25);">
+        <div style="font-size:32px;margin-bottom:12px;">💸</div>
+        <h3 style="color:#fb923c;font-size:16px;margin-bottom:8px;">Royalties Not Enforced</h3>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Creators, brands, and organizers lose out on revenue. No transparent on-chain split between all stakeholders.</p>
+      </div>
+      <div class="card" style="border-color:rgba(255,77,255,0.25);">
+        <div style="font-size:32px;margin-bottom:12px;">🎭</div>
+        <h3 style="color:var(--neon-pink);font-size:16px;margin-bottom:8px;">Culture is Excluded</h3>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Cricket stars, meme creators, influencers, and fashion designers have no dedicated Web3 home to monetize their craft.</p>
+      </div>
+    </div>
+
+    <div class="card animate" style="margin-top:20px;border-color:rgba(255,255,255,0.08);padding:18px 24px;">
+      <p style="font-size:14px;color:var(--text-muted);text-align:center;line-height:1.7;">
+        The <strong style="color:var(--text-main);">$50B+ NFT market</strong> has no vertical platform purpose-built for
+        <strong style="color:var(--neon-green);">South Asian culture, sports, and digital creators</strong> —
+        leaving billions in untapped creator economy value on the table.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 3 — SOLUTION
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="blob" style="width:450px;height:450px;background:radial-gradient(circle,rgba(0,255,136,0.08),transparent 70%);bottom:-100px;left:-100px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">03 / 10</div>
+
+    <div class="tag tag-green animate">Our Solution</div>
+    <h2 class="animate" style="text-align:center;">An <span class="gradient-text">AI-Gated Marketplace</span><br/>Built for Culture NFTs</h2>
+    <div class="neon-line animate"></div>
+
+    <div class="grid-2 animate" style="margin-top:24px;gap:24px;">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <span style="font-size:24px;">🤖</span>
+            <h3 style="font-size:15px;color:var(--neon-green);">AI Gatekeeper</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Every asset passes through a FastAPI AI engine. Only high-quality, unique assets receive a cryptographic signature to mint on-chain.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <span style="font-size:24px;">🔐</span>
+            <h3 style="font-size:15px;color:var(--neon-blue);">ECDSA-Signed Minting</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Smart contract verifies AI signature on-chain. No signature = no mint. Replay attacks prevented via unique nonces.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card card-gold" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <span style="font-size:24px;">💰</span>
+            <h3 style="font-size:15px;color:var(--neon-gold);">70/15/15 Royalty Split</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;"><strong style="color:var(--text-main);">70%</strong> Creator · <strong style="color:var(--text-main);">15%</strong> Brand/Organizer · <strong style="color:var(--text-main);">15%</strong> Fankar Treasury — enforced by ERC-2981 on every secondary sale.</p>
+        </div>
+        <div class="card card-pink">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <span style="font-size:24px;">📦</span>
+            <h3 style="font-size:15px;color:var(--neon-pink);">IPFS Metadata</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">All assets and metadata permanently pinned to IPFS via Pinata. Decentralized storage, zero censorship, forever accessible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 4 — HOW IT WORKS
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(0,180,255,0.07),transparent 70%);top:-80px;right:-80px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">04 / 10</div>
+
+    <div class="tag tag-blue animate">Minting Flow</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">How the <span class="gradient-text">AI Gatekeeper</span> Works</h2>
+    <div class="neon-line animate"></div>
+
+    <div class="flow animate" style="margin-top:32px;gap:0;">
+      <div class="flow-step">
+        <div style="font-size:28px;margin-bottom:8px;">👤</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-main);letter-spacing:0.05em;">CREATOR</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Uploads asset + connects MetaMask</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(0,255,136,0.25);">
+        <div style="font-size:28px;margin-bottom:8px;">🤖</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-green);letter-spacing:0.05em;">AI ENGINE</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Analyzes quality &amp; uniqueness score</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(250,204,21,0.25);">
+        <div style="font-size:28px;margin-bottom:8px;">📌</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-gold);letter-spacing:0.05em;">IPFS PIN</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Asset + metadata → Pinata IPFS</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(0,180,255,0.25);">
+        <div style="font-size:28px;margin-bottom:8px;">✍️</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-blue);letter-spacing:0.05em;">SIGNATURE</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">ECDSA sign via Web3.py + EIP-191</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(255,77,255,0.25);">
+        <div style="font-size:28px;margin-bottom:8px;">⛓️</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-pink);letter-spacing:0.05em;">MINT NFT</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Contract verifies sig → ERC-721 minted</div>
+      </div>
+    </div>
+
+    <div class="grid-3 animate" style="margin-top:28px;">
+      <div class="card" style="padding:16px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Uniqueness Threshold</div>
+        <div style="font-size:28px;font-weight:800;color:var(--neon-green);">70%+</div>
+        <div class="bar-track"><div class="bar-fill" style="width:70%;background:linear-gradient(90deg,var(--neon-green),var(--neon-blue));"></div></div>
+      </div>
+      <div class="card" style="padding:16px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Nonce Entropy</div>
+        <div style="font-size:28px;font-weight:800;color:var(--neon-blue);">64-bit</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">secrets.randbits(64)</div>
+      </div>
+      <div class="card" style="padding:16px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Replay Protection</div>
+        <div style="font-size:28px;font-weight:800;color:var(--neon-gold);">usedNonces</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">mapping on-chain</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 5 — 5 CATEGORIES
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <div class="blob" style="width:500px;height:500px;background:radial-gradient(circle,rgba(250,204,21,0.05),transparent 70%);top:-120px;right:-100px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">05 / 10</div>
+
+    <div class="tag tag-gold animate">5 Asset Categories</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;"><span class="gradient-gold">Culture NFTs</span> for Every Creator</h2>
+    <div class="neon-line animate" style="background:linear-gradient(90deg,var(--neon-gold),#fb923c);"></div>
+
+    <div class="grid-5 animate" style="margin-top:28px;">
+      <div class="card" style="text-align:center;padding:20px 14px;border-color:rgba(0,255,136,0.2);">
+        <div style="font-size:34px;margin-bottom:10px;">👕</div>
+        <div style="font-size:13px;font-weight:700;color:var(--neon-green);margin-bottom:6px;">Kit Design</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Sports jerseys, team kits &amp; apparel NFTs</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(0,255,136,0.6);letter-spacing:0.08em;">CREATOR</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:34px;margin-bottom:10px;">🏏</div>
+        <div style="font-size:13px;font-weight:700;color:var(--neon-blue);margin-bottom:6px;">Gully2PSL</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Street cricket stars on their path to PSL glory</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(0,180,255,0.6);letter-spacing:0.08em;">ATHLETE</div>
+      </div>
+      <div class="card card-pink" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:34px;margin-bottom:10px;">😂</div>
+        <div style="font-size:13px;font-weight:700;color:var(--neon-pink);margin-bottom:6px;">Viral Memes</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Tokenize &amp; own the internet's cultural moments</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(255,77,255,0.6);letter-spacing:0.08em;">CULTURE</div>
+      </div>
+      <div class="card card-gold" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:34px;margin-bottom:10px;">⭐</div>
+        <div style="font-size:13px;font-weight:700;color:var(--neon-gold);margin-bottom:6px;">Influencers</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Digital creator collectibles &amp; exclusive content</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(250,204,21,0.6);letter-spacing:0.08em;">INFLUENCE</div>
+      </div>
+      <div class="card" style="text-align:center;padding:20px 14px;border-color:rgba(168,85,247,0.25);">
+        <div style="font-size:34px;margin-bottom:10px;">🎨</div>
+        <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:6px;">Creators Hub</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">Original digital artwork &amp; multimedia collectibles</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(168,85,247,0.6);letter-spacing:0.08em;">ARTIST</div>
+      </div>
+    </div>
+
+    <div class="card animate" style="margin-top:20px;padding:14px 24px;border-color:rgba(250,204,21,0.15);">
+      <p style="font-size:13px;color:var(--text-muted);text-align:center;">
+        Each category has <strong style="color:var(--text-main);">dedicated AI scoring</strong> — Bowling Speed for Gully2PSL,
+        Uniqueness Score for artwork, Virality Index for memes.
+        <strong style="color:var(--neon-gold);"> Custom metadata, custom logic, one unified protocol.</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 6 — TECH STACK
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(0,180,255,0.07),transparent 70%);bottom:-80px;left:-80px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">06 / 10</div>
+
+    <div class="tag tag-blue animate">Tech Stack</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">Full-Stack <span class="gradient-text">Web3 Architecture</span></h2>
+    <div class="neon-line animate"></div>
+
+    <div class="grid-3 animate" style="margin-top:28px;">
+      <!-- Frontend -->
+      <div class="card" style="border-color:rgba(0,255,136,0.2);">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-green);margin-bottom:14px;font-weight:700;">Frontend</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-green);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Next.js 14 App Router</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-green);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">TailwindCSS + CSS vars</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-green);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">ethers.js v6 (MetaMask)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-green);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">React Context (Wallet)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-green);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Deployed on Vercel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backend -->
+      <div class="card card-blue">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-blue);margin-bottom:14px;font-weight:700;">AI Backend</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">FastAPI + Uvicorn</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">httpx AsyncClient</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Web3.py + eth-account</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Pinata IPFS Storage</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Deployed on Render</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Contracts -->
+      <div class="card card-gold">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-gold);margin-bottom:14px;font-weight:700;">Smart Contracts</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-gold);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Solidity 0.8.24</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-gold);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">OpenZeppelin v5 (ERC-721)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-gold);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">ERC-2981 Royalties</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-gold);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">Hardhat 3 + viem</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--neon-gold);flex-shrink:0;"></span>
+            <span style="font-size:13px;color:var(--text-muted);">WireFluid EVM (92533)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 animate" style="margin-top:18px;">
+      <div class="card" style="padding:14px 20px;display:flex;align-items:center;gap:12px;border-color:rgba(255,255,255,0.08);">
+        <span class="pulse-dot"></span>
+        <span style="font-size:13px;color:var(--text-muted);">Contract: <strong style="color:var(--text-main);font-family:monospace;font-size:11px;">0x1ea0...30C69</strong></span>
+      </div>
+      <div class="card" style="padding:14px 20px;display:flex;align-items:center;gap:12px;border-color:rgba(255,255,255,0.08);">
+        <span class="pulse-dot" style="background:var(--neon-blue);box-shadow:0 0 8px var(--neon-blue);"></span>
+        <span style="font-size:13px;color:var(--text-muted);">Live at: <strong style="color:var(--neon-blue);">fankar-protocol.vercel.app</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 7 — SMART CONTRACT
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(250,204,21,0.06),transparent 70%);top:-80px;left:-80px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">07 / 10</div>
+
+    <div class="tag tag-gold animate">Smart Contract</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">FankarNFT.sol — <span class="gradient-gold">On-Chain Security</span></h2>
+    <div class="neon-line animate" style="background:linear-gradient(90deg,var(--neon-gold),#fb923c);"></div>
+
+    <div class="grid-2 animate" style="margin-top:24px;gap:24px;align-items:start;">
+      <div>
+        <h3 style="font-size:14px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;">Security Features</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">🔒</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-main);">ReentrancyGuard</div>
+              <div style="font-size:11px;color:var(--text-muted);">Prevents re-entrancy on mint function</div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">✍️</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-main);">ECDSA Signature Verify</div>
+              <div style="font-size:11px;color:var(--text-muted);">EIP-191 message, aiSigner address check</div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">🎯</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-main);">Nonce Replay Prevention</div>
+              <div style="font-size:11px;color:var(--text-muted);">mapping(uint256 → bool) usedNonces</div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">👑</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-main);">Ownable Admin Controls</div>
+              <div style="font-size:11px;color:var(--text-muted);">Update signer, treasury, fee — owner only</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size:14px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;">Royalty Economics</h3>
+        <div class="card card-gold" style="padding:20px;">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:var(--text-main);">Creator</span>
+                <span style="font-size:13px;font-weight:700;color:var(--neon-green);">70%</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:70%;background:var(--neon-green);"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:var(--text-main);">Brand / Organizer</span>
+                <span style="font-size:13px;font-weight:700;color:var(--neon-blue);">15%</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:15%;background:var(--neon-blue);"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:var(--text-main);">Fankar Treasury</span>
+                <span style="font-size:13px;font-weight:700;color:var(--neon-gold);">15%</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:15%;background:var(--neon-gold);"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(250,204,21,0.15);font-size:11px;color:var(--text-muted);text-align:center;">
+            ERC-2981 enforced · automatic on every secondary sale
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 8 — MARKETPLACE
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <div class="blob" style="width:450px;height:450px;background:radial-gradient(circle,rgba(255,77,255,0.06),transparent 70%);bottom:-100px;right:-100px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">08 / 10</div>
+
+    <div class="tag tag-gold animate">Buyers Marketplace</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">Explore &amp; Trade <span class="gradient-gold">Live On-Chain NFTs</span></h2>
+    <div class="neon-line animate" style="background:linear-gradient(90deg,var(--neon-gold),var(--neon-pink));"></div>
+
+    <div class="grid-2 animate" style="margin-top:24px;gap:24px;">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-gold);margin-bottom:12px;font-weight:700;">Hybrid Gallery</div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">Real minted NFTs fetched live from WireFluid blockchain via <code style="color:var(--neon-green);font-size:11px;">totalMinted()</code> + <code style="color:var(--neon-green);font-size:11px;">tokenURI()</code>, merged with curated mock listings for a full marketplace experience.</p>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-blue);margin-bottom:12px;font-weight:700;">Asset Details Modal</div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">Click any NFT to open a full-screen modal. Plays video assets (<code style="color:var(--neon-blue);font-size:11px;">.mp4</code>) or shows high-res images. Displays AI score, price, network, token ID.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon-green);margin-bottom:12px;font-weight:700;">Real MetaMask Buy</div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.7;"><code style="color:var(--neon-green);font-size:11px;">signer.sendTransaction()</code> to contract address with WIRE value. 5-step UI: connecting → switching chain → sending → confirming → success.</p>
+        </div>
+      </div>
+
+      <div>
+        <!-- Mock NFT card preview -->
+        <div style="background:linear-gradient(135deg,rgba(10,22,40,0.95),rgba(5,11,20,0.95));border:1px solid rgba(0,255,136,0.2);border-radius:14px;overflow:hidden;">
+          <div style="height:160px;background:linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,180,255,0.08),rgba(255,77,255,0.06));display:flex;align-items:center;justify-content:center;position:relative;">
+            <span style="font-size:56px;">🏏</span>
+            <div style="position:absolute;top:10px;left:10px;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.4);border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;color:var(--neon-green);letter-spacing:0.1em;">🟢 LIVE ON-CHAIN</div>
+          </div>
+          <div style="padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:14px;font-weight:700;color:var(--text-main);">Ahmed Raza — Gully Star</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Gully2PSL · Token #1</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:15px;font-weight:800;color:var(--neon-gold);">12.5 WIRE</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <span style="font-size:11px;color:var(--text-muted);">AI Score</span>
+              <span style="font-size:12px;font-weight:700;color:var(--neon-green);">90%</span>
+            </div>
+            <div class="bar-track" style="margin-bottom:14px;"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,var(--neon-green),var(--neon-blue));"></div></div>
+            <button style="width:100%;padding:10px;border-radius:8px;background:linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.1));border:1px solid rgba(250,204,21,0.35);color:var(--neon-gold);font-size:13px;font-weight:700;letter-spacing:0.06em;cursor:pointer;">
+              BUY NOW
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 9 — ROADMAP
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s9">
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(0,255,136,0.06),transparent 70%);top:-80px;right:-80px;"></div>
+    <div class="logo-mark"><div class="logo-hex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="2" /></svg></div><div><span class="logo-text">FANKAR</span><span class="logo-sub">PROTOCOL</span></div></div>
+    <div class="slide-num">09 / 10</div>
+
+    <div class="tag tag-green animate">Roadmap</div>
+    <h2 class="animate" style="text-align:center;margin-bottom:8px;">Building the Future of <span class="gradient-text">Culture Finance</span></h2>
+    <div class="neon-line animate"></div>
+
+    <div class="grid-2 animate" style="margin-top:24px;gap:20px;">
+      <div>
+        <div class="card" style="border-color:rgba(0,255,136,0.35);margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--neon-green);">Phase 1 — NOW ✅</div>
+            <div class="pulse-dot"></div>
+          </div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+            <li style="font-size:13px;color:var(--text-muted);">✅ Smart contract deployed on WireFluid</li>
+            <li style="font-size:13px;color:var(--text-muted);">✅ AI Gatekeeper live on Render</li>
+            <li style="font-size:13px;color:var(--text-muted);">✅ Frontend deployed on Vercel</li>
+            <li style="font-size:13px;color:var(--text-muted);">✅ End-to-end minting verified</li>
+          </ul>
+        </div>
+        <div class="card card-blue">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--neon-blue);margin-bottom:10px;">Phase 2 — Q3 2026</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+            <li style="font-size:13px;color:var(--text-muted);">🔜 Real AI model integration (vision LLM)</li>
+            <li style="font-size:13px;color:var(--text-muted);">🔜 Secondary marketplace with WIRE payments</li>
+            <li style="font-size:13px;color:var(--text-muted);">🔜 Creator profiles &amp; portfolio pages</li>
+            <li style="font-size:13px;color:var(--text-muted);">🔜 Mobile responsive full PWA</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card card-gold" style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--neon-gold);margin-bottom:10px;">Phase 3 — Q4 2026</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+            <li style="font-size:13px;color:var(--text-muted);">🚀 PSL / PCB official partnership</li>
+            <li style="font-size:13px;color:var(--text-muted);">🚀 WIRE staking for governance</li>
+            <li style="font-size:13px;color:var(--text-muted);">🚀 Cross-chain bridge (ETH / BNB)</li>
+            <li style="font-size:13px;color:var(--text-muted);">🚀 10,000+ creator onboarding campaign</li>
+          </ul>
+        </div>
+        <div class="card card-pink">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--neon-pink);margin-bottom:10px;">Phase 4 — 2027</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+            <li style="font-size:13px;color:var(--text-muted);">🌍 Expand to Bollywood &amp; K-Pop culture</li>
+            <li style="font-size:13px;color:var(--text-muted);">🌍 DAO governance fully decentralized</li>
+            <li style="font-size:13px;color:var(--text-muted);">🌍 1M+ NFTs minted on protocol</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 10 — CALL TO ACTION
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide" id="s10">
+    <div class="blob" style="width:600px;height:600px;background:radial-gradient(circle,rgba(0,255,136,0.08),transparent 70%);top:-150px;left:50%;transform:translateX(-50%);"></div>
+    <div class="blob" style="width:400px;height:400px;background:radial-gradient(circle,rgba(0,180,255,0.07),transparent 70%);bottom:-100px;left:-80px;"></div>
+    <div class="slide-num">10 / 10</div>
+
+    <div class="hero-hex animate" style="width:100px;height:100px;border-radius:20px;">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" stroke="#00ff88" stroke-width="1.5" fill="rgba(0,255,136,0.12)" />
+        <circle cx="12" cy="12" r="3.5" fill="#00ff88" opacity="0.9" />
+      </svg>
+    </div>
+
+    <div class="tag tag-green animate">Join the Protocol</div>
+
+    <h1 class="animate" style="text-align:center;font-size:48px;">
+      The Future of Culture is<br/><span class="gradient-text">On-Chain.</span>
+    </h1>
+
+    <p class="lead animate" style="margin-top:16px;">
+      Fankar Protocol is live, open-source, and ready to onboard creators.
+      Be part of the first AI-gated NFT ecosystem built for South Asian culture.
+    </p>
+
+    <div class="grid-3 animate" style="margin-top:28px;max-width:700px;">
+      <div class="card" style="text-align:center;padding:18px 14px;">
+        <div style="font-size:22px;margin-bottom:8px;">🌐</div>
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:4px;">LIVE DEMO</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-green);">fankar-protocol.vercel.app</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:18px 14px;">
+        <div style="font-size:22px;margin-bottom:8px;">⚙️</div>
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:4px;">API</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-blue);">fankar-protocol.onrender.com</div>
+      </div>
+      <div class="card card-gold" style="text-align:center;padding:18px 14px;">
+        <div style="font-size:22px;margin-bottom:8px;">📂</div>
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:4px;">SOURCE CODE</div>
+        <div style="font-size:12px;font-weight:700;color:var(--neon-gold);">github.com/MuhammadBilal-Hub771</div>
+      </div>
+    </div>
+
+    <div class="card animate" style="margin-top:20px;padding:14px 28px;border-color:rgba(0,255,136,0.25);max-width:560px;">
+      <p style="font-size:13px;color:var(--text-muted);text-align:center;line-height:1.7;">
+        Built on <strong style="color:var(--neon-green);">WireFluid</strong> ·
+        Secured by <strong style="color:var(--neon-blue);">ECDSA AI Signatures</strong> ·
+        Stored on <strong style="color:var(--neon-gold);">IPFS forever</strong> ·
+        <strong style="color:var(--text-main);">100% Open Source</strong>
+      </p>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── Navigation Controls ──────────────────────────────── -->
+<div id="dots"></div>
+<div id="nav">
+  <button id="prevBtn" onclick="prevSlide()" disabled>← PREV</button>
+  <span id="counter">1 / 10</span>
+  <button id="nextBtn" onclick="nextSlide()">NEXT →</button>
+</div>
+
+<script>
+  const TOTAL   = 10;
+  let current   = 1;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 1 ? ' active' : '');
+    d.onclick   = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > TOTAL || n === current) return;
+    const prev = document.getElementById('s' + current);
+    const next = document.getElementById('s' + n);
+    prev.classList.add('exit');
+    prev.classList.remove('active');
+    setTimeout(() => prev.classList.remove('exit'), 450);
+    next.classList.add('active');
+    current = n;
+    updateUI();
+  }
+
+  function nextSlide() { goTo(current + 1); }
+  function prevSlide() { goTo(current - 1); }
+
+  function updateUI() {
+    document.getElementById('counter').textContent = current + ' / ' + TOTAL;
+    document.getElementById('prevBtn').disabled = current === 1;
+    document.getElementById('nextBtn').disabled = current === TOTAL;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i + 1 === current);
+    });
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ')  nextSlide();
+    if (e.key === 'ArrowLeft')                     prevSlide();
+  });
+</script>
+</body>
+</html>
